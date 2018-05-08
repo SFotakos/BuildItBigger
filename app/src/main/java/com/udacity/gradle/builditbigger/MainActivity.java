@@ -51,27 +51,27 @@ public class MainActivity extends AppCompatActivity {
         new JokeBackendAsyncTask().execute(this);
     }
 
-    public void displayJoke(String joke){
+    public void displayJoke(String joke) {
         Intent jokeActivityIntent = new Intent(this, StageActivity.class);
         jokeActivityIntent.putExtra(StageActivity.JOKE_STAGE, joke);
         startActivity(jokeActivityIntent);
     }
 
     // Implemented as seen on https://github.com/GoogleCloudPlatform/gradle-appengine-templates/tree/77e9910911d5412e5efede5fa681ec105a0f02ad/HelloEndpoints#2-connecting-your-android-app-to-the-backend
-    class JokeBackendAsyncTask extends AsyncTask<MainActivity, Void, String>{
+    class JokeBackendAsyncTask extends AsyncTask<MainActivity, Void, String> {
         private String LOCAL_HOST = "http://10.0.2.2:8080";
         private MyApi myApiService = null;
         private MainActivity activity;
 
         @Override
         protected String doInBackground(MainActivity... activities) {
-            if(myApiService == null) {
+            if (myApiService == null) {
                 MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(), null)
                         .setRootUrl(LOCAL_HOST + "/_ah/api/")
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
-                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) {
                                 abstractGoogleClientRequest.setDisableGZipContent(true);
                             }
                         });
@@ -89,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            activity.displayJoke(result);
+            if (activity != null) {
+                activity.displayJoke(result);
+            }
         }
     }
 }
