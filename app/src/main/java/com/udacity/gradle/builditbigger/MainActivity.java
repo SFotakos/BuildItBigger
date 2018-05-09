@@ -17,7 +17,7 @@ import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
 
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements JokeBackendAsyncTask.IAPICallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,47 +51,10 @@ public class MainActivity extends AppCompatActivity {
         new JokeBackendAsyncTask().execute(this);
     }
 
+    @Override
     public void displayJoke(String joke) {
         Intent jokeActivityIntent = new Intent(this, StageActivity.class);
         jokeActivityIntent.putExtra(StageActivity.JOKE_STAGE, joke);
         startActivity(jokeActivityIntent);
-    }
-
-    // Implemented as seen on https://github.com/GoogleCloudPlatform/gradle-appengine-templates/tree/77e9910911d5412e5efede5fa681ec105a0f02ad/HelloEndpoints#2-connecting-your-android-app-to-the-backend
-    class JokeBackendAsyncTask extends AsyncTask<MainActivity, Void, String> {
-        private String LOCAL_HOST = "http://10.0.2.2:8080";
-        private MyApi myApiService = null;
-        private MainActivity activity;
-
-        @Override
-        protected String doInBackground(MainActivity... activities) {
-            if (myApiService == null) {
-                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
-                        new AndroidJsonFactory(), null)
-                        .setRootUrl(LOCAL_HOST + "/_ah/api/")
-                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
-                            @Override
-                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) {
-                                abstractGoogleClientRequest.setDisableGZipContent(true);
-                            }
-                        });
-
-                myApiService = builder.build();
-            }
-
-            activity = activities[0];
-            try {
-                return myApiService.getJoke().execute().getData();
-            } catch (IOException e) {
-                return e.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (activity != null) {
-                activity.displayJoke(result);
-            }
-        }
     }
 }
